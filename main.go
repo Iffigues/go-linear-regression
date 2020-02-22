@@ -16,5 +16,8 @@ func main() {
 		return
 	}
 	f := data.NewMeta(g, 10e-8, 10e-3, 0., 0.)
-	fmt.Println(f.Rescale(f.Train()))
+	theta0_hat, theta1_hat := f.Rescale(f.Train())
+	y_hat := f.Predict(theta0_hat, theta1_hat, g.KmNatural)
+	coeff_r2 := data.Coeff_r2(g.PriceNatural, y_hat)
+	fmt.Println(coeff_r2)
 }

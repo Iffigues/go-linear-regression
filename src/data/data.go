@@ -2,7 +2,6 @@ package data
 
 import (
 	"errors"
-	"fmt"
 	"math"
 )
 
@@ -76,10 +75,8 @@ func (d Meta) Train() (theta0, theta1 float64) {
 	theta0_next := theta0 - d.Grad_theta0(theta0, theta1)
 	theta1_next := theta1 - d.Grad_theta1(theta0, theta1)
 	for i := 0; i < 1000; i++ {
-		fmt.Println(i)
 		diff0 := math.Abs(theta0_next - theta0)
 		diff1 := math.Abs(theta1_next - theta1)
-		fmt.Println(diff0, diff1, d.Seuil)
 		if (diff0 <= d.Seuil) && (diff1 <= d.Seuil) {
 			return theta0, theta1
 		}
