@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// GetFileContent return content file
 func GetFileContent(file string) (text string, err error) {
 	content, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -46,9 +47,9 @@ func isGood(g interface{}) (err error) {
 	default:
 		return errors.New("pls dataset have to be [][]string")
 	}
-	return errors.New("pls dataset have to be [][]string")
 }
 
+// GetCsv return float array in csv
 func GetCsv(file string) (a, b []float64, err error) {
 	in, err := GetFileContent(file)
 	if err != nil {

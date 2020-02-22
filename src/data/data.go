@@ -31,8 +31,10 @@ func NewData(a, b []float64) (g Data, err error) {
 		err = errors.New("not good things")
 		return
 	}
-	g.Km = a
-	g.Price = b
+	g.Km = Normalize(a)
+	fmt.Println(g.Km)
+	g.Price = Normalize(b)
+	fmt.Println(g.Price)
 	g.Size = len(a)
 	return
 }
@@ -50,7 +52,7 @@ func (dd Meta) EstimatePrice(theta0, theta1, x float64) (d float64) {
 	return theta0 + (theta1 * x)
 }
 
-func (d Meta) Derivate_theta0(theta0, theta1 float64) (res float64) {
+func (d Meta) Grad_theta0(theta0, theta1 float64) (res float64) {
 	res = 0
 	for i := 0; i <= d.L.Size-1; i++ {
 		res = res + (d.EstimatePrice(theta0, theta1, d.L.Km[i]) - d.L.Price[i])
@@ -58,7 +60,7 @@ func (d Meta) Derivate_theta0(theta0, theta1 float64) (res float64) {
 	return d.Epsilon * (1.00 / float64(d.L.Size)) * res
 }
 
-func (d Meta) Derivate_theta1(theta0, theta1 float64) (res float64) {
+func (d Meta) Grad_theta1(theta0, theta1 float64) (res float64) {
 	res = 0
 	for i := 0; i <= d.L.Size-1; i++ {
 		res = res + (d.EstimatePrice(theta0, theta1, d.L.Km[i])-d.L.Price[i])*d.L.Km[i]
@@ -69,20 +71,20 @@ func (d Meta) Derivate_theta1(theta0, theta1 float64) (res float64) {
 func (d Meta) Train() (theta0, theta1 float64) {
 	theta0 = d.Theta0_init
 	theta1 = d.Theta1_init
-	theta0_next := d.Derivate_theta0(theta0, theta1)
-	theta1_next := d.Derivate_theta1(theta0, theta1)
-	fmt.Println(theta0_next)
-	fmt.Println(theta1_next)
-	for i := 0; i < MaxInt; i++ {
+	theta0_next := theta0 - d.Grad_theta0(theta0, theta1)
+	theta1_next := theta1 - d.Grad_theta1(theta0, theta1)
+	for i := 0; i < 1000; i++ {
+		fmt.Println(i)
 		diff0 := math.Abs(theta0_next - theta0)
 		diff1 := math.Abs(theta1_next - theta1)
+		fmt.Println(diff0, diff1, d.Seuil)
 		if (diff0 <= d.Seuil) && (diff1 <= d.Seuil) {
 			return theta0, theta1
 		}
 		theta0 = theta0_next
 		theta1 = theta1_next
-		theta0_next = d.Derivate_theta0(theta0, theta1)
-		theta1_next = d.Derivate_theta1(theta0, theta1)
+		theta0_next = theta0 - d.Grad_theta0(theta0, theta1)
+		theta1_next = theta1 - d.Grad_theta1(theta0, theta1)
 	}
 	return
 }
