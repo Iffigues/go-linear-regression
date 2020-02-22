@@ -15,6 +15,6 @@ func main() {
 	if err != nil {
 		return
 	}
-	f := data.NewMeta(g, 10e-5, 10e-3, 0.0, 0.0)
-	fmt.Println(f.Train())
+	f := data.NewMeta(g, 10e-8, 10e-3, 0., 0.)
+	fmt.Println(f.Rescale(f.Train()))
 }

@@ -7,9 +7,11 @@ import (
 )
 
 type Data struct {
-	Km    []float64
-	Price []float64
-	Size  int
+	KmNatural    []float64
+	PriceNatural []float64
+	Km           []float64
+	Price        []float64
+	Size         int
 }
 
 const (
@@ -31,10 +33,10 @@ func NewData(a, b []float64) (g Data, err error) {
 		err = errors.New("not good things")
 		return
 	}
+	g.KmNatural = a
+	g.PriceNatural = b
 	g.Km = Normalize(a)
-	fmt.Println(g.Km)
 	g.Price = Normalize(b)
-	fmt.Println(g.Price)
 	g.Size = len(a)
 	return
 }
@@ -57,7 +59,7 @@ func (d Meta) Grad_theta0(theta0, theta1 float64) (res float64) {
 	for i := 0; i <= d.L.Size-1; i++ {
 		res = res + (d.EstimatePrice(theta0, theta1, d.L.Km[i]) - d.L.Price[i])
 	}
-	return d.Epsilon * (1.00 / float64(d.L.Size)) * res
+	return 2 * d.Epsilon * (1.00 / float64(d.L.Size)) * res
 }
 
 func (d Meta) Grad_theta1(theta0, theta1 float64) (res float64) {
@@ -65,7 +67,7 @@ func (d Meta) Grad_theta1(theta0, theta1 float64) (res float64) {
 	for i := 0; i <= d.L.Size-1; i++ {
 		res = res + (d.EstimatePrice(theta0, theta1, d.L.Km[i])-d.L.Price[i])*d.L.Km[i]
 	}
-	return d.Epsilon * (1.00 / float64(d.L.Size)) * res
+	return 2 * d.Epsilon * (1.00 / float64(d.L.Size)) * res
 }
 
 func (d Meta) Train() (theta0, theta1 float64) {
@@ -86,5 +88,16 @@ func (d Meta) Train() (theta0, theta1 float64) {
 		theta0_next = theta0 - d.Grad_theta0(theta0, theta1)
 		theta1_next = theta1 - d.Grad_theta1(theta0, theta1)
 	}
+	return
+}
+
+func (d Meta) Rescale(theta0_tilt, theta1_tilt float64) (theta0_hat, theta1_hat float64) {
+	mean_x := Moyenne(d.L.KmNatural)
+	mean_y := Moyenne(d.L.PriceNatural)
+	std_x := Std(d.L.KmNatural)
+	std_y := Std(d.L.PriceNatural)
+
+	theta0_hat = std_y*theta0_tilt + mean_y - (std_y/std_x)*mean_x*theta1_tilt
+	theta1_hat = (std_y / std_x) * theta1_tilt
 	return
 }
